@@ -29,8 +29,8 @@ function foo(x) {
 
 console.log(Random.$$int(10));
 
-function inc(n) {
-  return n + 1 | 0;
+function inc(param) {
+  return 1 + param | 0;
 }
 
 var r = List.fold_left((function (prim, prim$1) {
@@ -61,7 +61,11 @@ function $(f, g, x) {
   return Curry._1(f, Curry._1(g, x));
 }
 
-function $great$great$eq(prim, prim$1) {
+function flip(f, a, b) {
+  return Curry._2(f, b, a);
+}
+
+function bind(prim, prim$1) {
   return prim$1.then(Curry.__1(prim));
 }
 
@@ -69,20 +73,29 @@ function pure(prim) {
   return Promise.resolve(prim);
 }
 
+function $great$great$eq(param, param$1) {
+  return param.then(Curry.__1(param$1));
+}
+
 var Promise$1 = /* module */[
-  /* >>= */$great$great$eq,
-  /* pure */pure
+  /* bind */bind,
+  /* pure */pure,
+  /* >>= */$great$great$eq
 ];
 
-var prim = new Promise((function (resolve, _) {
+var p = new Promise((function (resolve, _) {
         return resolve(2);
       }));
 
-function prim$1(param) {
+function prim(param) {
   return Promise.resolve((console.log(param), param));
 }
 
-prim.then(prim$1);
+p.then(prim);
+
+$great$great$eq($great$great$eq(p, (function (param) {
+            return Promise.resolve((console.log(param), param));
+          })), pure);
 
 var x = "foo";
 
@@ -94,5 +107,7 @@ exports.r = r;
 exports.now = now;
 exports.tap = tap;
 exports.$ = $;
+exports.flip = flip;
 exports.Promise = Promise$1;
+exports.p = p;
 /*  Not a pure module */

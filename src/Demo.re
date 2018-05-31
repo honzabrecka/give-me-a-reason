@@ -23,11 +23,11 @@ let foo = (x: 'a): 'a => {
 
 Js.log(Random.int(10));
 
-let inc = (n) => n + 1;
+let inc = (+)(1);
 
 let r = [1, 2, 3]
-|> List.map(inc)
-|> List.fold_left((+), 0);
+  |> List.map(inc)
+  |> List.fold_left((+), 0);
 
 Js.log(r)
 
@@ -42,12 +42,18 @@ let tap = (f: ('a => unit), v: 'a): 'a => {
 
 let ($) = (f, g, x) => f(g(x));
 
+let flip = (f, a, b) => f(b, a)
+
 module Promise {
-  let (>>=) = Js.Promise.then_;
+  let bind = Js.Promise.then_;
   let pure = Js.Promise.resolve;
+  let (>>=) = flip(Js.Promise.then_)
 };
 
 open Promise;
 
-Js.Promise.make((~resolve, ~reject) => resolve(. 2))
-|> (>>=)(pure $ tap(Js.log));
+let p = Js.Promise.make((~resolve, ~reject) => resolve(. 2));
+
+p |> bind (pure $ tap(Js.log));
+
+p >>= (pure $ tap(Js.log)) >>= pure;
